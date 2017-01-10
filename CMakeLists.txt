@@ -419,6 +419,7 @@ standard_library (modules/array.dt       array         algorithms utility math d
 standard_library (modules/algorithms.dt  algorithms    utility)
 standard_library (modules/derivations.dt derivations   utility)
 standard_library (modules/enum.dt        enum          utility)
+standard_library (modules/print.dt        print          enum macros cstdio)
 standard_library (modules/bitset-enum.dt bitset-enum   enum)
 standard_library (modules/variant.dt     variant       enum)
 
