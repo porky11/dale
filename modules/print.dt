@@ -1,0 +1,91 @@
+#|
+@module print
+
+A generic print function and definitions for all primitive types.
+
+|#
+;(module print)
+(import cstdio)
+(import macros)
+(import enum)
+
+(using-namespace std.macros
+
+;;this should be defined in some utility-lib, maybe macros
+(def wrap-list (fn (attr cto) extern (p DNode) ((mc (p MContext)) (form (p DNode)) (name (p DNode)))
+  (@:@ 
+    (map-nodes mc form (cast name (p void))
+      (fn (attr cto) (p DNode) ((mc (p MContext)) (form (p DNode)) (a (p void)))
+        (let ((name \ (cast a (p DNode))))
+          (qq (uq name) (uq form)))))
+  list-node)))
+
+;;this should return the last input value, not the result of the last called print-function
+(def print (macro extern (rest)
+  (let ((arg-list \ (get-varargs-list mc (arg-count mc) rest))
+        (print-args \ (wrap-list mc arg-list (q print-object))))
+  (qq let ((oldout \ stdout)
+           (result \ (do (uql print-args))))
+    (setv stdout oldout)
+    result))))
+
+(def invoke (macro extern ((a (p file)) rest)
+  (let ((list \ (get-varargs-list mc (- (arg-count mc) 1) rest)))
+    (qq print (uq a) (uql list)))))
+)
+
+(def-enum modifier extern uint (endl))
+
+
+
+(def print-object (fn extern bool ((a (p file)))
+  (setv stdout a)))
+
+(def print-object (fn extern char ((a char))
+  (putchar a)
+  a))
+
+(def print-object (fn extern (p (const char)) ((a (p (const char))))
+  (fputs a stdout)
+  a))
+
+
+;;TODO: Should print functions really have to return a value, or should just the last return, only if it has a value
+(def print-object (fn extern bool ((a modifier))
+  (if (= a endl)
+    (puts "")
+    false)
+  (fflush stdout)
+  false))
+
+
+;;TODO: find a better way to print numbers (more efficiently and supporting all numbers
+
+(mfor T (int int8 int16 int32 int64 int128)
+  (def print-object (fn extern T ((a T))
+    (printf "%i" a)
+    a)))
+
+(mfor T (uint uint8 uint16 uint32 uint64 uint128 size)
+  (def print-object (fn extern T ((a T))
+    (printf "%o" a endl)
+    a)))
+
+(mfor T (float double)
+  (def print-object (fn extern T ((a T))
+    (printf "%d" a endl)
+    a)))
+
+#|
+
+(def test (fn extern-c void (void)
+  (print "a" #\b 3 endl) ;;print using print macro, even supports modifiers
+  (print 1 2 stderr "error?" stdout 3 4) ;;switch output
+  (stderr "error") ;;don't have to write print, if first argument is a stream (p file)
+  (print (* 3 
+            (stderr (+ 1 2))) ;;debug output and return it's value. 
+         endl)))
+
+|#
+
+
