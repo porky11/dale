@@ -3,8 +3,15 @@
 
 A generic print function and definitions for all primitive types.
 
+TODO:
+  (also see comments in code)
+  add print functions to library datatypes (array, vector, etc) (this could be done generically using iterators, maybe in this file)
+  add modifiers for decimal representaitions, for array/vector/etc. representation, 
+
 |#
-;(module print)
+
+
+(module print)
 (import cstdio)
 (import macros)
 (import enum)
@@ -13,7 +20,7 @@ A generic print function and definitions for all primitive types.
 
 ;;this should be defined in some utility-lib, maybe macros
 (def wrap-list (fn (attr cto) extern (p DNode) ((mc (p MContext)) (form (p DNode)) (name (p DNode)))
-  (@:@ 
+  (@:@
     (map-nodes mc form (cast name (p void))
       (fn (attr cto) (p DNode) ((mc (p MContext)) (form (p DNode)) (a (p void)))
         (let ((name \ (cast a (p DNode))))
@@ -26,7 +33,7 @@ A generic print function and definitions for all primitive types.
         (print-args \ (wrap-list mc arg-list (q print-object))))
   (qq let ((oldout \ stdout)
            (result \ (do (uql print-args))))
-    (setv stdout oldout)
+    (setv stdout oldout) ;;use macros to select stream at compile time
     result))))
 
 (def invoke (macro extern ((a (p file)) rest)
