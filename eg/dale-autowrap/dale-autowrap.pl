@@ -177,7 +177,11 @@ sub process_typedef
       sprintf("(def %s (struct extern ((a %s))))",
               $data->{'name'},
               $type);
+    } else {
+      $TYPE_MAP{§data->{'name'}}=$type;
+      '' #don't skip void types
     }
+
 }
 
 sub process_union
